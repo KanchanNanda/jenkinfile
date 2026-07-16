@@ -14,7 +14,7 @@ pipeline {
                 echo "Initializing Apache"
                 sudo yum install httpd -y
                 sudo mkdir -p /var/www/html
-                sudo cp index.html /var/www/html
+                sudo cp jenkinfile /var/www/html
                 sudo systemctl stop firewalld
                 '''
             }
@@ -35,7 +35,7 @@ pipeline {
                 echo "Deploying to Production Apache Server"
                 sudo yum install httpd -y
                 sudo mkdir -p /var/www/html
-                sudo cp index.html /var/www/html
+                sudo cp jenkinfile /var/www/html
                 sudo systemctl stop firewalld
                 '''
             }
