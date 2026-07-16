@@ -1,0 +1,85 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout Source code') {
+            steps {
+                checkout scm 
+            }
+        }
+
+        stage('Deploy to testing server') {
+            steps {
+                sh '''
+                echo "Initializing Apache"
+                sudo yum install httpd -y
+                sudo mkdir -p /var/www/html
+                sudo cp index.html /var/www/html
+                sudo systemctl stop firewalld
+                '''
+            }
+        }
+
+        stage('Technical Team Approval') {
+            steps {
+                input(
+                    message: 'Is Technical Team Testing Successful?',
+                    ok: 'Approve Deployment'
+                )
+            }
+        }
+
+        stage('Deploy to production server') {
+            steps {
+                sh '''
+                echo "Deploying to Production Apache Server"
+                sudo yum install httpd -y
+                sudo mkdir -p /var/www/html
+                sudo cp index.html /var/www/html
+                sudo systemctl stop firewalld
+                '''
+            }
+        }
+
+        stage('Manager Approval') {
+            steps {
+                input(
+                    message: 'Does Manager Approve Production Release?',
+                    ok: 'Release'
+                )
+            }
+        }
+      
+        stage('Production release complete') {
+            steps {
+                echo "Application Successfully Deployed by Jenkins"
+            }
+        }
+    }
+
+    post {
+        success {
+            emailext(
+                to: 'nandakanchan400@gmail.com',
+                subject: 'Production Deployment Successfully Done',
+                body: '''
+                Hello Team, 
+                Production Deployment Done.
+                All stages worked perfectly.
+                '''
+            )
+        }
+
+        failure {
+            emailext(
+                to: 'nandakanchan400@gmail.com',
+                subject: 'Production Deployment Failed',
+                body: '''
+                Hello Team, 
+                Production Deployment Failed.
+                Please check the Jenkins build logs.
+                '''
+            )
+        }
+    }
+}
